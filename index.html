@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emlak Katılım — Tasarruf Finansman</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; }
+body {
+  background: #0d1117;
+  color: #e6edf3;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2330;
+  --border: #30363d;
+  --border-light: #21262d;
+  --gold: #d4a843;
+  --gold-light: #e8c47a;
+  --gold-dim: rgba(212,168,67,0.15);
+  --gold-dim2: rgba(212,168,67,0.08);
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --text-dim: #484f58;
+  --green: #3fb950;
+  --green-dim: rgba(63,185,80,0.12);
+  --red: #f85149;
+  --red-dim: rgba(248,81,73,0.08);
+  --blue: #58a6ff;
+  --blue-dim: rgba(88,166,255,0.1);
+  --r: 12px;
+  --r-sm: 8px;
+}
+
+.page {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+@media (max-width: 600px) { .page { padding: 24px 14px 60px; } }
+
+/* Header */
+.hdr { text-align: center; margin-bottom: 40px; }
+.hdr-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim2); border: 1px solid rgba(212,168,67,0.3);
+  border-radius: 100px; padding: 5px 14px;
+  font-size: 11px; font-weight: 500; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 16px;
+}
+.hdr h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(24px, 6vw, 44px);
+  font-weight: 400; line-height: 1.15; margin-bottom: 8px;
+}
+.hdr h1 em { font-style: italic; color: var(--gold-light); }
+.hdr p { color: var(--text-muted); font-size: 14px; }
+
+/* Two-column layout */
+.layout { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+/* Card */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; width: 100%; }
+.card + .card { margin-top: 16px; }
+.card-hdr { padding: 14px 18px; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: 10px; }
+.card-ico { width: 30px; height: 30px; background: var(--gold-dim); border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.card-title { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+.card-body { padding: 18px; }
+
+/* Form fields */
+.field { margin-bottom: 16px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 7px; }
+.field label span.hint { font-size: 11px; font-weight: 400; color: var(--text-dim); text-transform: none; letter-spacing: 0; }
+
+.inp-wrap { position: relative; width: 100%; }
+.inp-wrap .unit { position: absolute; right: 11px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-dim); font-family: 'DM Mono', monospace; pointer-events: none; }
+
+input[type="text"] {
+  display: block; width: 100%;
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 12px 44px 12px 13px;
+  font-family: 'DM Mono', monospace; font-size: 15px; color: var(--text);
+  outline: none; transition: border-color .2s, box-shadow .2s;
+  -webkit-appearance: none; appearance: none;
+}
+input[type="text"]:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim2); }
+input[readonly] { opacity: .6; cursor: default; }
+
+/* Two-column input row */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.toggle-grp { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-sm); padding: 3px; gap: 3px; }
+.tog-btn { flex: 1; padding: 10px 8px; border: none; border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; background: transparent; color: var(--text-muted); }
+.tog-btn.on { background: var(--gold); color: #0d1117; }
+
+input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; background: var(--border); border-radius: 3px;
+  outline: none; cursor: pointer; margin-top: 10px; display: block;
+}
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold); border: 2px solid var(--bg); cursor: pointer; }
+input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); border: 2px solid var(--bg); cursor: pointer; }
+
+.slider-row { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-dim); font-family: 'DM Mono', monospace; margin-top: 5px; }
+
+.divider { border: none; border-top: 1px solid var(--border-light); margin: 16px 0; }
+
+.btn-calc {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 15px; margin-top: 6px;
+  background: var(--gold); border: none; border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: #0d1117;
+  cursor: pointer; transition: all .2s;
+}
+.btn-calc:hover { background: var(--gold-light); }
+.btn-calc:active { transform: scale(.98); opacity: .9; }
+
+/* Rules card */
+.rules { font-size: 12px; color: var(--text-muted); line-height: 1.9; }
+.rules p::before { content: '• '; }
+
+/* Right panel */
+.right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+/* Stats grids */
+.sg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.sg .s2 { grid-column: span 2; }
+@media (max-width: 500px) {
+  .sg { grid-template-columns: 1fr; }
+  .sg .s2 { grid-column: span 1; }
+}
+.sc { background: var(--surface2); border: 1px solid var(--border-light); border-radius: var(--r-sm); padding: 13px; min-width: 0; }
+.sc.hl { background: var(--gold-dim2); border-color: rgba(212,168,67,.25); }
+.sl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 500; margin-bottom: 7px; line-height: 1.4; }
+.sv { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; word-break: break-all; }
+.sv.gold { color: var(--gold-light); }
+.ss { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-family: 'DM Mono', monospace; line-height: 1.6; }
+
+/* Progress */
+.prog-wrap { background: var(--surface2); border: 1px solid var(--border-light); border-radius: var(--r-sm); padding: 13px; margin-bottom: 14px; }
+.prog-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.prog-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; font-weight: 500; }
+.prog-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); }
+.prog-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light)); border-radius: 3px; transition: width .6s ease; }
+.prog-fill.ok { background: linear-gradient(90deg, var(--green), #56d364); }
+
+/* Alert */
+.alert { border-radius: var(--r-sm); padding: 11px 13px; font-size: 12px; line-height: 1.5; margin-bottom: 12px; display: flex; gap: 7px; }
+.alert.warn { background: var(--red-dim); border: 1px solid rgba(248,81,73,.25); color: var(--red); }
+.alert.ok { background: var(--green-dim); border: 1px solid rgba(63,185,80,.25); color: var(--green); }
+
+/* Table — scrollable container, table has no fixed min-width */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 1px solid var(--border-light); border-radius: var(--r-sm); }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  background: var(--surface2); padding: 9px 10px;
+  text-align: left; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted);
+  white-space: nowrap; border-bottom: 1px solid var(--border);
+}
+tbody td {
+  padding: 9px 10px; border-bottom: 1px solid var(--border-light);
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text);
+  white-space: nowrap;
+}
+tbody tr:last-child td { border-bottom: none; }
+.row-org td { background: rgba(88,166,255,.04); }
+.row-pes td { background: rgba(63,185,80,.05); }
+.row-teslim td { background: rgba(212,168,67,.12); color: var(--gold-light) !important; }
+.row-ay6 td { border-bottom: 2px dashed rgba(212,168,67,.4) !important; }
+.firsat-cell { color: var(--red) !important; }
+.kalan-zero { color: var(--green) !important; font-weight: 600; }
+.kalan-pos { color: var(--text-muted); }
+
+.badge { display: inline-flex; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; font-family: 'DM Sans', sans-serif; }
+.b-org { background: var(--blue-dim); color: var(--blue); }
+.b-pes { background: var(--green-dim); color: var(--green); }
+.b-tak { background: var(--gold-dim); color: var(--gold); }
+
+.tbl-hint { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+/* Empty state */
+.empty { text-align: center; padding: 50px 16px; }
+.empty .ico { font-size: 36px; opacity: .4; margin-bottom: 12px; }
+.empty p { font-size: 14px; color: var(--text-muted); }
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.anim { animation: fadeUp .3s ease forwards; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hdr">
+    <div class="hdr-badge">🏦 Tasarruf Finansman Sistemi</div>
+    <h1>Emlak Katılım<br><em>Ödeme Planı Hesaplayıcı</em></h1>
+    <p>Konut bedelini ve peşinat tutarını girerek kişisel ödeme planınızı oluşturun</p>
+  </div>
+
+  <div class="layout">
+    <!-- LEFT: Form -->
+    <div>
+      <div class="card">
+        <div class="card-hdr"><div class="card-ico">⚙️</div><span class="card-title">Parametreler</span></div>
+        <div class="card-body">
+
+          <div class="field">
+            <label>Konut Bedeli</label>
+            <div class="inp-wrap">
+              <input type="text" id="konutBedeli" value="4.000.000" oninput="onBedelInput(this)" onblur="formatInput(this)">
+              <span class="unit">TL</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Peşinat</label>
+            <div class="toggle-grp">
+              <button class="tog-btn on" onclick="setPesinat('yok')">Peşinatsız</button>
+              <button class="tog-btn" onclick="setPesinat('var')">Peşinatlı</button>
+            </div>
+          </div>
+
+          <div class="field" id="pesinatField" style="display:none">
+            <label>Peşinat Tutarı</label>
+            <div class="inp-wrap">
+              <input type="text" id="pesinatTutar" value="500.000" oninput="onPesinatInput(this)" onblur="formatInput(this)">
+              <span class="unit">TL</span>
+            </div>
+            <input type="range" id="pesinatSlider" min="5" max="70" value="12" step="1" oninput="syncSliderToInput()">
+            <div class="slider-row">
+              <span>%5</span><span>%20</span><span>%40</span><span>%55</span><span>%70</span>
+              <span id="sliderPct" style="color:var(--gold)">—</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Aylık Taksit <span class="hint">(boş = otomatik)</span></label>
+            <div class="inp-wrap">
+              <input type="text" id="aylikTaksitInput" placeholder="ör: 200.000" oninput="onTaksitInput(this)" onblur="formatInputOpt(this)">
+              <span class="unit">TL</span>
+            </div>
+          </div>
+
+          <hr class="divider">
+
+          <div class="field-row">
+            <div class="field" style="margin-bottom:0">
+              <label>Aylık PPF</label>
+              <div class="inp-wrap">
+                <input type="text" id="ppfOrani" value="4,06" oninput="debounce()">
+                <span class="unit">%</span>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Stopaj</label>
+              <div class="inp-wrap">
+                <input type="text" id="stopajOrani" value="17,5" oninput="debounce()">
+                <span class="unit">%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="field-row" style="margin-top:16px">
+            <div class="field" style="margin-bottom:0">
+              <label>Konut Kredisi Faiz</label>
+              <div class="inp-wrap">
+                <input type="text" id="krediOrani" value="2,79" oninput="debounce()">
+                <span class="unit">%/ay</span>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label>Enflasyon Beklentisi</label>
+              <div class="inp-wrap">
+                <input type="text" id="enfOrani" value="2,5" oninput="debounce()">
+                <span class="unit">%/ay</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hdr"><div class="card-ico">📋</div><span class="card-title">Sistem Kuralları</span></div>
+        <div class="card-body">
+          <div class="rules">
+            <p>Org. ücreti = Ana Para × <strong style="color:var(--blue)">%7</strong></p>
+            <p>İlk gün: Org. ücretinin <strong style="color:var(--blue)">%50'si</strong> peşin ödenir</p>
+            <p>Kalan %50 → <strong style="color:var(--blue)">4 eşit aylık taksit</strong> (1–4. aylar)</p>
+            <p><strong style="color:var(--gold)">1. taksit de ilk gün</strong> ödenir</p>
+            <p>İlk 6 ayda ana paranın <strong style="color:var(--gold)">%40'ı</strong> ödenmiş olmalı</p>
+            <p>Ana para taksitleri <strong>eşit</strong> bölünür</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="right-panel" id="rightPanel">
+      <div class="card">
+        <div class="card-body">
+          <div class="empty">
+            <div class="ico">🏠</div>
+            <p>Parametreleri doldurup <strong>Ödeme Planı Oluştur</strong>'a tıklayın</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let pesinatVar = false;
+
+function setPesinat(v) {
+  pesinatVar = v === 'var';
+  document.getElementById('pesinatField').style.display = pesinatVar ? 'block' : 'none';
+  document.querySelectorAll('.tog-btn').forEach((b,i) => b.classList.toggle('on', pesinatVar ? i===1 : i===0));
+  updateSliderPct(); debounce();
+}
+
+function parseN(s) { return parseFloat(String(s).replace(/\./g,'').replace(',','.')) || 0; }
+function fmt(n) { return Math.round(n).toLocaleString('tr-TR'); }
+function fmtTL(n) { return fmt(n) + ' TL'; }
+
+function getAna() { return parseN(document.getElementById('konutBedeli').value); }
+function getPesinat() { return pesinatVar ? parseN(document.getElementById('pesinatTutar').value) : 0; }
+function getPPF() { return parseFloat(String(document.getElementById('ppfOrani').value).replace(',','.')) || 0; }
+function getStopaj() { return parseFloat(String(document.getElementById('stopajOrani').value).replace(',','.')) || 0; }
+function getKredi() { return parseFloat(String(document.getElementById('krediOrani').value).replace(',','.')) || 0; }
+function getEnf() { return parseFloat(String(document.getElementById('enfOrani').value).replace(',','.')) || 0; }
+function getManualTaksit() { return parseN(document.getElementById('aylikTaksitInput').value) || 0; }
+
+function formatInput(el) { const n = parseN(el.value); if (n > 0) el.value = fmt(n); debounce(); }
+function formatInputOpt(el) { const n = parseN(el.value); el.value = n > 0 ? fmt(n) : ''; debounce(); }
+function onBedelInput(el) { el.value = el.value.replace(/[^\d.]/g,''); updateSliderPct(); debounce(); }
+function onPesinatInput(el) { el.value = el.value.replace(/[^\d.]/g,''); syncInputToSlider(); debounce(); }
+function onTaksitInput(el) { el.value = el.value.replace(/[^\d.]/g,''); debounce(); }
+
+let _dbt = null;
+function debounce() { clearTimeout(_dbt); _dbt = setTimeout(hesapla, 450); }
+
+function updateSliderPct() {
+  if (!pesinatVar) return;
+  const ana = getAna(), p = getPesinat();
+  if (ana > 0) document.getElementById('sliderPct').textContent = '%' + (p/ana*100).toFixed(1);
+}
+
+function syncSliderToInput() {
+  const ana = getAna();
+  const pct = parseFloat(document.getElementById('pesinatSlider').value);
+  document.getElementById('pesinatTutar').value = fmt(Math.round(ana * pct / 100 / 10000) * 10000);
+  updateSliderPct(); debounce();
+}
+
+function syncInputToSlider() {
+  const ana = getAna(), p = getPesinat();
+  if (ana > 0) document.getElementById('pesinatSlider').value = Math.min(70, Math.max(5, p/ana*100)).toFixed(0);
+  updateSliderPct();
+}
+
+function addMonth(d, n) { const r = new Date(d); r.setMonth(r.getMonth()+n); return r; }
+function fmtDate(d) {
+  return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+}
+function parseDate(s) { const p = s.split('.'); return new Date(+p[2],+p[1]-1,+p[0]); }
+
+function hesapla() {
+  const ana = getAna();
+  if (!ana) return;
+
+  const pesinat = getPesinat();
+  const baslangic = new Date();
+  const t0 = fmtDate(baslangic);
+
+  const org = Math.round(ana * 0.07);
+  const orgIlk = Math.round(org / 2);
+  const orgKalan = org - orgIlk;
+  const orgAylik = Math.round(orgKalan / 4);
+
+  const anaKalan = ana - pesinat;
+  const hedef40 = ana * 0.40;
+  const manualTaksit = getManualTaksit();
+
+  let aylikTaksit;
+  if (manualTaksit > 0) {
+    aylikTaksit = manualTaksit;
+  } else {
+    const min6 = Math.max(0, hedef40 - pesinat);
+    aylikTaksit = Math.max(Math.ceil(min6 / 6 / 1000) * 1000, 10000);
+  }
+
+  const taksitSayisi = Math.ceil(anaKalan / aylikTaksit);
+  const sonTaksit = anaKalan - (taksitSayisi - 1) * aylikTaksit;
+
+  // Build rows
+  const rows = [];
+  let birikim = 0, kalanAna = anaKalan;
+
+  birikim += orgIlk;
+  rows.push({ no:'-', tarih:t0, tutar:orgIlk, birikim, kalan:ana+orgKalan, tip:'org', badge:'Org. Ücreti', _ay:0 });
+
+  if (pesinat > 0) {
+    birikim += pesinat;
+    rows.push({ no:'-', tarih:t0, tutar:pesinat, birikim, kalan:anaKalan+orgKalan, tip:'pes', badge:'Peşinat', _ay:0 });
+  }
+
+  const t1 = taksitSayisi === 1 ? sonTaksit : aylikTaksit;
+  kalanAna -= t1; birikim += t1;
+  rows.push({ no:1, tarih:t0, tutar:t1, birikim, kalan:Math.max(0,kalanAna), tip:'tak', badge:'Taksit', _ay:0, _tak:1 });
+
+  let takNo = 2;
+  for (let ay = 1; ay <= taksitSayisi - 1; ay++) {
+    const tarih = fmtDate(addMonth(baslangic, ay));
+    if (ay <= 4) {
+      birikim += orgAylik;
+      rows.push({ no:'-', tarih, tutar:orgAylik, birikim, kalan:null, tip:'org', badge:'Org. Ücreti', _ay:ay });
+    }
+    const tutar = takNo === taksitSayisi ? sonTaksit : aylikTaksit;
+    kalanAna -= tutar; birikim += tutar;
+    rows.push({ no:takNo, tarih, tutar, birikim, kalan:Math.max(0,kalanAna), tip:'tak', badge:'Taksit', _ay:ay, _tak:takNo });
+    takNo++;
+  }
+
+  // Fix org kalan
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i].kalan === null) {
+      for (let j = i+1; j < rows.length; j++) {
+        if (rows[j].tip === 'tak') { rows[i].kalan = rows[j].kalan + rows[j].tutar; break; }
+      }
+      if (rows[i].kalan === null) rows[i].kalan = 0;
+    }
+  }
+
+  // 6. taksit + tapu
+  let ay6Idx = -1;
+  for (let i = rows.length-1; i >= 0; i--) {
+    if (rows[i].tip === 'tak' && rows[i]._tak === 6) { ay6Idx = i; break; }
+  }
+  const row6 = rows.find(r => r.tip === 'tak' && r._tak === 6);
+  const tapu = row6 ? new Date(parseDate(row6.tarih).getTime() + 10*86400000) : new Date(baslangic.getTime() + 10*86400000);
+
+  // Fırsat maliyeti
+  const ppf = getPPF(), stopaj = getStopaj();
+  const gunlukNet = (ppf / 30 / 100) * (1 - stopaj / 100);
+  // Enflasyon
+  const enfAylik = getEnf() / 100;
+  let toplamFirsat = 0, toplamEnf = 0;
+  rows.forEach(r => {
+    const gun = Math.max(0, Math.round((tapu - parseDate(r.tarih)) / 86400000));
+    const ay = gun / 30;
+    r.gun = gun;
+    r.firsat = Math.round(r.tutar * gunlukNet * gun);
+    // Enflasyon etkisi: ödenen tutarın tapuya kadar reel değer kaybı
+    // reel_kayıp = tutar * ((1 + enf)^ay - 1)
+    r.enfKayip = enfAylik > 0 ? Math.round(r.tutar * (Math.pow(1 + enfAylik, ay) - 1)) : 0;
+    toplamFirsat += r.firsat;
+    toplamEnf += r.enfKayip;
+  });
+
+  // %40 check
+  const ilk6 = rows.filter(r => r.tip === 'tak' && r._tak <= 6);
+  const ilk6Top = pesinat + ilk6.reduce((s,r) => s+r.tutar, 0);
+  const ilk6Pct = (ilk6Top / ana * 100).toFixed(1);
+  const kuralOk = ilk6Top >= hedef40;
+
+  // Kredi
+  const kr = getKredi() / 100;
+  let krediFaiz = 0, krediAylik = 0;
+  if (kr > 0) {
+    const P = ana - pesinat, n = taksitSayisi;
+    krediAylik = Math.round(P * kr * Math.pow(1+kr,n) / (Math.pow(1+kr,n)-1));
+    krediFaiz = Math.round(krediAylik * n - P);
+  }
+
+  // Masraflar
+  const mBase = 4000000;
+  const masraf = {
+    tapu:      Math.round(ana * 160000/mBase),
+    tahsis:    Math.round(ana * 20000/mBase),
+    ekspertiz: Math.round(ana * 6000/mBase),
+    ipotek:    Math.round(ana * 3000/mBase),
+  };
+  masraf.toplam = masraf.tapu + masraf.tahsis + masraf.ekspertiz + masraf.ipotek;
+
+  render({ ana, org, orgIlk, orgAylik, pesinat, aylikTaksit, taksitSayisi, sonTaksit,
+           ilk6Top, ilk6Pct, kuralOk, hedef40, rows, ay6Idx, tapu, toplamFirsat,
+           gunlukNet, krediFaiz, krediAylik, masraf, toplamEnf, enfAylik });
+}
+
+function render(d) {
+  const tapuStr = fmtDate(d.tapu);
+
+  const tableRows = d.rows.map((r, i) => {
+    let cls = r.tip === 'org' ? 'row-org' : r.tip === 'pes' ? 'row-pes' : '';
+    if (r.tip === 'tak' && r._tak === 6) cls = 'row-teslim';
+    if (i === d.ay6Idx) cls += ' row-ay6';
+    const bc = r.tip === 'org' ? 'b-org' : r.tip === 'pes' ? 'b-pes' : 'b-tak';
+    const kc = r.kalan === 0 ? 'kalan-zero' : 'kalan-pos';
+    return `<tr class="${cls}">
+      <td style="color:var(--text-dim)">${r.no}</td>
+      <td>${r.tarih}</td>
+      <td>${fmtTL(r.tutar)}</td>
+      <td style="color:var(--text-muted)">${fmtTL(r.birikim)}</td>
+      <td class="${kc}">${r.kalan !== null ? fmtTL(r.kalan) : '—'}</td>
+      <td style="color:var(--text-dim)">${r.gun}g</td>
+      <td class="firsat-cell">-${fmtTL(r.firsat)}</td>
+      <td style="color:rgba(248,130,80,0.9)">-${fmtTL(r.enfKayip)}</td>
+      <td><span class="badge ${bc}">${r.badge}</span></td>
+    </tr>`;
+  }).join('');
+
+  const avantaj = d.krediFaiz > d.toplamFirsat;
+
+  document.getElementById('rightPanel').innerHTML = `
+    <div class="card anim">
+      <div class="card-hdr"><div class="card-ico">📊</div><span class="card-title">Özet</span></div>
+      <div class="card-body">
+
+        <div class="sg">
+          <div class="sc">
+            <div class="sl">Ana Para</div>
+            <div class="sv">${fmtTL(d.ana)}</div>
+          </div>
+          <div class="sc">
+            <div class="sl">Org. Ücreti (%7)</div>
+            <div class="sv" style="color:var(--blue)">${fmtTL(d.org)}</div>
+            <div class="ss">İlk gün ${fmtTL(d.orgIlk)} + 4×${fmtTL(d.orgAylik)}/ay</div>
+          </div>
+          <div class="sc">
+            <div class="sl">Peşinat</div>
+            <div class="sv" style="color:var(--green)">${fmtTL(d.pesinat)}</div>
+            <div class="ss">${d.ana > 0 ? '%'+(d.pesinat/d.ana*100).toFixed(1) : '%0'}</div>
+          </div>
+          <div class="sc hl">
+            <div class="sl">Aylık Ana Taksit</div>
+            <div class="sv gold">${fmtTL(d.aylikTaksit)}</div>
+            <div class="ss">${d.taksitSayisi} taksit, 1. taksit ilk gün${d.sonTaksit !== d.aylikTaksit ? ' · son: '+fmtTL(d.sonTaksit) : ''}</div>
+          </div>
+          <div class="sc s2" style="background:var(--red-dim); border-color:rgba(248,81,73,.2)">
+            <div class="sl">Toplam Fırsat Maliyeti <span style="text-transform:none;letter-spacing:0;font-weight:400">(tapuya kadar · ${tapuStr})</span></div>
+            <div class="sv" style="color:var(--red)">-${fmtTL(d.toplamFirsat)}</div>
+            <div class="ss">Günlük net oran: %${(d.gunlukNet*100).toFixed(4)}</div>
+          </div>
+        </div>
+
+        <div class="sg">
+          <div class="sc" style="background:var(--blue-dim); border-color:rgba(88,166,255,.2)">
+            <div class="sl">🏦 Konut Kredisi Faiz (${d.taksitSayisi} ay)</div>
+            <div class="sv" style="color:var(--blue)">-${fmtTL(d.krediFaiz)}</div>
+            <div class="ss">
+              Aylık taksit: ${fmtTL(d.krediAylik)}<br>
+              Enf. reel kayıp (aylık %${(d.enfAylik*100).toFixed(2)}): -${fmtTL(d.toplamEnf)}<br>
+              Fırsat mal. + Enf.: -${fmtTL(d.toplamFirsat + d.toplamEnf)}<br>
+              <span style="color:${d.krediFaiz > d.toplamFirsat + d.toplamEnf ? 'var(--green)' : 'var(--red)'}">
+                ${d.krediFaiz > d.toplamFirsat + d.toplamEnf
+                  ? '✓ Tasarruf fin. '+fmtTL(d.krediFaiz - d.toplamFirsat - d.toplamEnf)+' avantajlı'
+                  : '✗ Kredi '+fmtTL(d.toplamFirsat + d.toplamEnf - d.krediFaiz)+' avantajlı'}
+              </span>
+            </div>
+          </div>
+          <div class="sc" style="background:rgba(212,168,67,.05); border-color:rgba(212,168,67,.2)">
+            <div class="sl">📋 Ortak Masraflar</div>
+            <div class="sv gold">-${fmtTL(d.masraf.toplam)}</div>
+            <div class="ss">
+              Tapu: ${fmtTL(d.masraf.tapu)}<br>
+              Tahsis: ${fmtTL(d.masraf.tahsis)}<br>
+              Ekspertiz: ${fmtTL(d.masraf.ekspertiz)}<br>
+              İpotek: ${fmtTL(d.masraf.ipotek)}
+            </div>
+          </div>
+        </div>
+
+        <div class="prog-wrap">
+          <div class="prog-hdr">
+            <span class="prog-lbl">İlk 6 Taksit — %40 Kuralı</span>
+            <span class="prog-pct">%${d.ilk6Pct}</span>
+          </div>
+          <div class="prog-bg">
+            <div class="prog-fill ${parseFloat(d.ilk6Pct)>=40?'ok':''}" style="width:${Math.min(100,parseFloat(d.ilk6Pct)/70*100)}%"></div>
+          </div>
+          <div class="slider-row" style="margin-top:5px">
+            <span>${fmtTL(d.ilk6Top)} ödendi</span>
+            <span style="color:var(--gold)">Min: ${fmtTL(d.hedef40)}</span>
+          </div>
+        </div>
+
+        <div class="alert ${d.kuralOk ? 'ok' : 'warn'}">
+          ${d.kuralOk
+            ? `✅ İlk 6 taksit kuralı sağlanıyor — ${fmtTL(d.ilk6Top)} (%${d.ilk6Pct} ≥ %40)`
+            : `⚠️ İlk 6 taksit kuralı sağlanamıyor — ${fmtTL(d.ilk6Top)} (%${d.ilk6Pct} < %40)`}
+        </div>
+      </div>
+    </div>
+
+    <div class="card anim">
+      <div class="card-hdr"><div class="card-ico">📅</div><span class="card-title">Ödeme Planı</span></div>
+      <div class="card-body" style="padding:0">
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th>No</th><th>Tarih</th><th>Tutar</th>
+              <th>Birikim</th><th>Kalan</th><th>Tapu</th>
+              <th>Fırsat</th><th>Enf. Kayıp</th><th>Tip</th>
+            </tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="tbl-hint">6. taksit kesikli çizgiyle işaretlendi · Tapu: ${tapuStr}</div>
+  `;
+}
+
+setTimeout(hesapla, 200);
+</script>
+</body>
+</html>
