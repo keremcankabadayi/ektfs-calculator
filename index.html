@@ -378,6 +378,18 @@ function fmtDate(d) {
 }
 function parseDate(s) { const p = s.split('.'); return new Date(+p[2],+p[1]-1,+p[0]); }
 
+const MAX_TAKSIT = 480;
+
+function renderError(msg) {
+  document.getElementById('rightPanel').innerHTML = `
+    <div class="card anim">
+      <div class="card-hdr"><div class="card-ico">⚠️</div><span class="card-title">Hesaplanamadı</span></div>
+      <div class="card-body">
+        <div class="alert warn">${msg}</div>
+      </div>
+    </div>`;
+}
+
 function hesapla() {
   const ana = getAna();
   if (!ana) return;
@@ -403,7 +415,26 @@ function hesapla() {
     aylikTaksit = Math.max(Math.ceil(min6 / 6 / 1000) * 1000, 10000);
   }
 
+  if (aylikTaksit <= 0) {
+    renderError('Aylık taksit sıfırdan büyük olmalıdır.');
+    return;
+  }
+
   const taksitSayisi = Math.ceil(anaKalan / aylikTaksit);
+  if (!isFinite(taksitSayisi) || taksitSayisi < 1) {
+    renderError('Geçersiz taksit planı.');
+    return;
+  }
+  if (taksitSayisi > MAX_TAKSIT) {
+    const minAylik = Math.ceil(anaKalan / MAX_TAKSIT);
+    renderError(
+      'Aylık taksit çok düşük: en fazla ' + MAX_TAKSIT + ' taksit üretilebilir. ' +
+      'Yazarken ara değerler (ör. <strong>2</strong>) çok kısa süre de olsa bu sınırı aşabilir; ' +
+      'tam tutarı girin veya en az <strong>' + fmt(minAylik) + ' TL</strong>/ay deneyin.'
+    );
+    return;
+  }
+
   const sonTaksit = anaKalan - (taksitSayisi - 1) * aylikTaksit;
 
   // Build rows
